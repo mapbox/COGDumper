@@ -4,6 +4,8 @@ A python3 utility to extract a tile from a Cloud Optimized GeoTIFF (COG) without
 
 This can be useful for serving JPEG compressed tiles from a TIFF without invoking Rasterio and GDAL.
 
+Tiled Tiff is an extension to TIFF 6.0 and more detail can be found [here](http://www.alternatiff.com/resources/TIFFphotoshop.pdf)
+
 ## Data Preparation
 
 Read the document on [COG](https://trac.osgeo.org/gdal/wiki/CloudOptimizedGeoTIFF) and create a tiled pyramid GeoTIFF.
