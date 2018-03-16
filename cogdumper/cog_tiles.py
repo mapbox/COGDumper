@@ -73,6 +73,8 @@ class COGTiff:
                 last_overview = -1
             else:
                 last_overview = overviews[-1]
+                if self._ifds[last_overview]['next_offset'] == 0:
+                    raise TIFFError(f'Request overview {overview} not found')
 
             if overview > 0 and offset is None:
                 last_ifd = self._ifds[last_overview]
@@ -82,15 +84,14 @@ class COGTiff:
                                 'and an offset is not supported.'
                                 )
 
-            r = range(last_overview + 1, overview + 1)
             for i in range(last_overview + 1, overview + 1):
                 next_offset = 0
+                pos = 0
+                tags = []
                 if self.big_tiff:
                     bytes = self.read(offset, 8)
                     num_tags = struct.unpack(f'{self.endian}Q', bytes)[0]
                     bytes = self.read(offset + 8, (num_tags * 20) + 8)
-                    pos = 0
-                    tags = []
 
                     for t in range(0, num_tags):
                         code = struct.unpack(
@@ -139,16 +140,10 @@ class COGTiff:
                         f'{self.endian}Q',
                         self.read(offset, 8)
                     )[0]
-                    self._ifds[i] = {
-                        'tags': tags,
-                        'next_offset': next_offset
-                    }
                 else:
                     bytes = self.read(offset, 2)
                     num_tags = struct.unpack(f'{self.endian}H', bytes)[0]
                     bytes = self.read(offset + 2, (num_tags * 12) + 2)
-                    pos = 0
-                    tags = []
                     for t in range(0, num_tags):
                         code = struct.unpack(
                             f'{self.endian}H',
@@ -197,12 +192,12 @@ class COGTiff:
                         self.read(offset, 4)
                     )[0]
 
-                    self._ifds[i] = {
-                        'tags': tags,
-                        'next_offset': next_offset
-                    }
+                self._ifds[i] = {
+                    'tags': tags,
+                    'next_offset': next_offset
+                }
 
-                    offset = next_offset
+                offset = next_offset
 
                 if next_offset == 0 and i < overview:
                     raise TIFFError(f'Request overview {overview} not found')

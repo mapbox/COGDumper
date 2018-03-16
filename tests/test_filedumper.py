@@ -34,12 +34,10 @@ def bigtiff(data_dir):
     with open(f, 'rb') as src:
         yield src
 
-
 def test_tiff_version(tiff):
     reader = FileReader(tiff)
     cog = COGTiff(reader.read)
     assert cog.version == 42
-
 
 def test_bigtiff_version(bigtiff):
     reader = FileReader(bigtiff)
@@ -58,8 +56,9 @@ def test_tiff_ifds(tiff):
     cog.read_ifd(1)
     assert [0, 1] == sorted(cog._ifds.keys())
     # skip to test range parsing
-    cog.read_ifd(4)
-    assert [0, 1, 2, 3, 4] == sorted(cog._ifds.keys())
+    cog.read_ifd(5)
+    assert [0, 1, 2, 3, 4, 5] == sorted(cog._ifds.keys())
+    assert 0 == cog._ifds[5]['next_offset']
     # check out of range
     with pytest.raises(TIFFError) as tiff_error:
         cog.read_ifd(10)
@@ -71,17 +70,23 @@ def test_bigtiff_ifds(bigtiff):
     assert cog._ifds == {}
     cog.read_header()
     assert 0 in cog._ifds
-    assert 2 == len(cog._ifds[0]['tags'])
-    assert 0 == cog._ifds[0]['next_offset']
+    assert 7 == len(cog._ifds[0]['tags'])
+    cog.read_ifd(4)
+    assert 0 == cog._ifds[4]['next_offset']
+    # check out of range
+    with pytest.raises(TIFFError) as tiff_error:
+        cog.read_ifd(10)
 
 def test_tiff_tile(tiff):
     reader = FileReader(tiff)
     cog = COGTiff(reader.read)
     compression, tile = cog.get_tile(0, 0, 0)
+    with open('test.jpg', 'wb') as f:
+        f.write(tile)
     assert compression == 'image/jpeg'
 
-# def test_bigtiff_tile(bigtiff):
-#     reader = FileReader(bigtiff)
-#     cog = COGTiff(reader.read)
-#     compression, tile = cog.get_tile(0, 0, 0)
-#     assert compression is None
+def test_bigtiff_tile(bigtiff):
+    reader = FileReader(bigtiff)
+    cog = COGTiff(reader.read)
+    compression, tile = cog.get_tile(0, 0, 0)
+    assert compression is None
