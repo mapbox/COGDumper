@@ -8,7 +8,8 @@ tags = {
     323: 'TileLength',
     324: 'TileOffsets',
     325: 'TileByteCounts',
-    259: 'Compression'
+    259: 'Compression',
+    347: 'JPEGTables'
 }
 
 compression = {
@@ -42,6 +43,11 @@ sizes = {
         # TIFFrational
         'format': 'f',
         'size': 4
+        },
+    7: {
+        # undefined
+        'format': 'B',
+        'size': 1
         },
     12: {
         # TIFFdouble

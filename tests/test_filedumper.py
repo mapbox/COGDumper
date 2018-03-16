@@ -51,7 +51,7 @@ def test_tiff_ifds(tiff):
     assert cog._ifds == {}
     cog.read_header()
     assert 0 in cog._ifds
-    assert 7 == len(cog._ifds[0]['tags'])
+    assert 8 == len(cog._ifds[0]['tags'])
     # read a next overview IFD to test reading is incremental
     cog.read_ifd(1)
     assert [0, 1] == sorted(cog._ifds.keys())
@@ -83,6 +83,8 @@ def test_tiff_tile(tiff):
     mime_type, tile = cog.get_tile(0, 0, 0)
     assert 1849 == len(cog._ifds[0]['offsets'])
     assert 1849 == len(cog._ifds[0]['byte_counts'])
+    assert 'jpeg_tables' in cog._ifds[0]
+    assert 142 == len(cog._ifds[0]['jpeg_tables'])
     assert mime_type == 'image/jpeg'
 
 def test_bigtiff_tile(bigtiff):
@@ -91,4 +93,6 @@ def test_bigtiff_tile(bigtiff):
     mime_type, tile = cog.get_tile(0, 0, 0)
     assert 1 == len(cog._ifds[0]['offsets'])
     assert 1 == len(cog._ifds[0]['byte_counts'])
+    assert 'jpeg_tables' in cog._ifds[0]
+    assert cog._ifds[0]['jpeg_tables'] is None
     assert mime_type == 'image/tiff'

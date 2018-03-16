@@ -34,7 +34,7 @@ def dump(file, output, xyz=None):
             # work around a bug with mimetypes
             if ext == '.jpe':
                 ext = '.jpg'
-                
+
             output = f'file_{xyz[0]}_{xyz[1]}_{xyz[2]}{ext}'
 
         with open(output, 'wb') as dst:

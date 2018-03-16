@@ -8,6 +8,7 @@ from cogdumper.errors import TIFFError
 from cogdumper.tifftags import compression as CompressionType
 from cogdumper.tifftags import sizes as TIFFSizes
 from cogdumper.tifftags import tags as TIFFTags
+from cogdumper.jpegreader import insert_tables
 
 def print_version(ctx, param, value):
     if not value or ctx.resilient_parsing:
@@ -235,7 +236,7 @@ class COGTiff:
 
     def get_tile(self, x, y, z):
         ifd = self.read_ifd(z)
-        ext = 'jpg'
+        mime_type = 'image/jpeg'
         # tile offsets are an extension but if they aren't in the file then
         # you can't get a tile back!
         if 'offsets' not in ifd:
@@ -245,6 +246,8 @@ class COGTiff:
             image_height = 0
             tile_width = 0
             tile_height = 0
+            jpeg_tables = None
+
             for t in ifd['tags']:
                 code = t['code']
                 fmt = t['dtype']['format']
@@ -267,9 +270,9 @@ class COGTiff:
                         t['data']
                     )[0]
                     if val in CompressionType:
-                        ext = CompressionType[val]
+                        mime_type = CompressionType[val]
                     else:
-                        ext = 'image/tiff'
+                        mime_type = 'image/tiff'
                 elif code == 322:
                     # tile width
                     tile_width = struct.unpack(
@@ -294,17 +297,21 @@ class COGTiff:
                         f'{self.endian}{t["num_values"]}{fmt}',
                         t['data']
                     )
+                elif code == 347:
+                    # JPEG Tables
+                    jpeg_tables = t['data']
 
             if len(offsets) == 0:
                 raise TIFFError('TIFF Tiles are not found in IFD {z}')
 
             ifd['image_width'] = image_width
             ifd['image_height'] = image_height
-            ifd['compression'] = ext
+            ifd['compression'] = mime_type
             ifd['tile_width'] = tile_width
             ifd['tile_height'] = tile_height
             ifd['offsets'] = offsets
             ifd['byte_counts'] = byte_counts
+            ifd['jpeg_tables'] = jpeg_tables
 
             ifd['nx_tiles'] = ceil(image_width / float(tile_width))
             ifd['ny_tiles'] = ceil(image_height / float(tile_height))
@@ -316,7 +323,13 @@ class COGTiff:
         else:
             offset = ifd['offsets'][idx]
             byte_count = ifd['byte_counts'][idx]
-            return ifd['compression'], self.read(offset, byte_count)
+            tile = self.read(offset, byte_count)
+            if ifd['compression'] == 'image/jpeg':
+                # fix up jpeg tile with missing quantization tables
+                tile = insert_tables(tile, ifd['jpeg_tables'])
+                return ifd['compression'], tile
+            else:
+                return ifd['compression'], tile
 
     @property
     def version(self):
