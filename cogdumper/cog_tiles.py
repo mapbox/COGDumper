@@ -269,7 +269,7 @@ class COGTiff:
                     if val in CompressionType:
                         ext = CompressionType[val]
                     else:
-                        ext = None
+                        ext = 'image/tiff'
                 elif code == 322:
                     # tile width
                     tile_width = struct.unpack(
@@ -311,12 +311,12 @@ class COGTiff:
 
         # retrieve tile
         idx = (y * ifd['ny_tiles']) + (x * ifd['nx_tiles'])
-        offset = ifd['offsets'][idx]
-        byte_count = ifd['byte_counts'][idx]
-        return ifd['compression'], self.read(offset, byte_count)
-
-    def get_tiles(self):
-        pass
+        if idx > len(ifd['offsets']):
+            raise TIFFError(f'Tile {x} {y} {z} does not exist')
+        else:
+            offset = ifd['offsets'][idx]
+            byte_count = ifd['byte_counts'][idx]
+            return ifd['compression'], self.read(offset, byte_count)
 
     @property
     def version(self):

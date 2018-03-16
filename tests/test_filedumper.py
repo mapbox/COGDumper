@@ -80,13 +80,15 @@ def test_bigtiff_ifds(bigtiff):
 def test_tiff_tile(tiff):
     reader = FileReader(tiff)
     cog = COGTiff(reader.read)
-    compression, tile = cog.get_tile(0, 0, 0)
-    with open('test.jpg', 'wb') as f:
-        f.write(tile)
-    assert compression == 'image/jpeg'
+    mime_type, tile = cog.get_tile(0, 0, 0)
+    assert 1849 == len(cog._ifds[0]['offsets'])
+    assert 1849 == len(cog._ifds[0]['byte_counts'])
+    assert mime_type == 'image/jpeg'
 
 def test_bigtiff_tile(bigtiff):
     reader = FileReader(bigtiff)
     cog = COGTiff(reader.read)
-    compression, tile = cog.get_tile(0, 0, 0)
-    assert compression is None
+    mime_type, tile = cog.get_tile(0, 0, 0)
+    assert 1 == len(cog._ifds[0]['offsets'])
+    assert 1 == len(cog._ifds[0]['byte_counts'])
+    assert mime_type == 'image/tiff'

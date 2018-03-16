@@ -1,8 +1,8 @@
 # COG Dumper
 
-A python3 utility to extract the tile from a Cloud Optimized GeoTIFF (COG) without decompressing the contained data. Tiff data can be hosted locally, on a web server or S3.
+A python3 utility to extract a tile from a Cloud Optimized GeoTIFF (COG) without decompressing the contained data. Tiff data can be hosted locally, on a web server or S3.
 
-This can be useful for serving WebP/JPEG compressed tiles from a TIFF without invoking Rasterio and GDAL.
+This can be useful for serving JPEG compressed tiles from a TIFF without invoking Rasterio and GDAL.
 
 ## Data Preparation
 
@@ -37,5 +37,5 @@ python cogdumper/s3dumper.py --help
 e.g.
 
 ```
-python cogdumper/filedumper.py --file data/cog.tif --output out --xyz 0 0 0
+python cogdumper/filedumper.py --file data/cog.tif --xyz 0 0 0
 ```
