@@ -1,38 +1,40 @@
 """A utility to dump tiles directly from a tiff file in an S3 bucket."""
 
 import mimetypes
+import os
 
 import boto3
+from botocore.exceptions import ClientError
 import click
 
 from cogdumper.cog_tiles import (AbstractReader, COGTiff, print_version)
 
-
-s3 = boto3.resource('s3')
+region = os.environ.get('AWS_REGION', 'us-east-1')
+s3 = boto3.resource('s3', region_name=region)
 
 class Reader(AbstractReader):
     """Wraps the remote COG."""
-    def __init__(self, read_func, bucket_name, key):
-        self.read_func = read_func
-        self.bucket = bucket
+    def __init__(self, bucket_name, key):
         self.filename = key
-        bucket = s3.Bucket(bucket_name)
-        self.bucket_exists = True
+        self.bucket = bucket_name
+        self._resource_exists = True
         try:
-            s3.meta.client.head_bucket(Bucket=bucket_name)
-        except botocore.exceptions.ClientError as e:
+            s3.meta.client.head_bucket(Bucket=bucket_name, Key=key)
+        except ClientError as e:
             # If a client error is thrown, then check that it was a 404 error.
             # If it was a 404 error, then the bucket does not exist.
             error_code = int(e.response['Error']['Code'])
             if error_code == 404:
-                self.bucket_exists = False
+                self._resource_exists = False
 
     @property
-    def bucket_exists(self):
-        return self.bucket_exists
+    def resource_exists(self):
+        return self._resource_exists
 
     def read(self, offset, length):
-        pass
+        r = s3.meta.client.get_object(Bucket=self.bucket, Key=self.key,
+                                Range=f'bytes={offset}-{offset + length - 1}')
+        return r['Body'].read()
 
 
 @click.command()
@@ -40,7 +42,7 @@ class Reader(AbstractReader):
               expose_value=False, is_eager=True)
 @click.option('--bucket', help='input bucket')
 @click.option('--key', help='bucket key')
-@click.option('--output', type=click.Path(exists=False, file_okay=False, writable=True), help='local output directory')
+@click.option('--output', default=None, type=click.Path(exists=False, file_okay=False, writable=True), help='local output directory')
 @click.option('--xyz', type=click.INT, default=[0, 0, 0], help='xyz tile coordinates where z is the overview level', nargs=3)
 def dump(bucket, key, output, xyz=None):
     """Command line entry for COG tile dumping."""
