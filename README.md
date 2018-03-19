@@ -44,4 +44,5 @@ e.g.
 ```
 python cogdumper/filedumper.py --file data/cog.tif --xyz 0 0 0
 python cogdumper/httpdumper.py --server http://localhost:8080 --path data --resource cog.tif
+python cogdumper/s3dumper.py --bucket bucket_name --key key_name/image.tif --xyz 0 0 0
 ```

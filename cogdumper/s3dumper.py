@@ -17,9 +17,11 @@ class Reader(AbstractReader):
     def __init__(self, bucket_name, key):
         self.filename = key
         self.bucket = bucket_name
+        self.key = key
         self._resource_exists = True
         try:
-            s3.meta.client.head_bucket(Bucket=bucket_name, Key=key)
+            print(bucket_name)
+            s3.meta.client.head_bucket(Bucket=bucket_name,)
         except ClientError as e:
             # If a client error is thrown, then check that it was a 404 error.
             # If it was a 404 error, then the bucket does not exist.
