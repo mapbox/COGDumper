@@ -2,10 +2,11 @@
 
 import mimetypes
 
+import click
 import requests
 from requests.auth import HTTPBasicAuth
 
-import click
+from cogdumper.errors import TIFFError
 
 from cogdumper.cog_tiles import (AbstractReader, COGTiff, print_version)
 
@@ -16,34 +17,42 @@ class Reader(AbstractReader):
         self.server = server
         self.path = path
         self.resource = resource
-        self.url = f'{server}/{path}/{resource}'
-
+        if path:
+            self.url = f'{server}/{path}/{resource}'
+        else:
+            self.url = f'{server}/{resource}'
         if user:
             self.auth = HTTPBasicAuth(user, password)
         else:
             self.auth = None
 
-        self.resource_exists = True
+        self._resource_exists = True
 
         self.session = requests.Session()
-        r = s.head(url, auth=self.auth)
+        r = self.session.head(self.url, auth=self.auth)
         if r.status_code != requests.codes.ok:
-            self.resource_exists = False
+            self._resource_exists = False
 
     @property
     def resource_exists(self):
-        return self.resource_exists
+        return self._resource_exists
 
     def read(self, offset, length):
-        pass
+        headers = {'Range': f'bytes={offset}-{offset + length - 1}'}
+        r = self.session.get(self.url, auth=self.auth, headers=headers)
+        if r.status_code != requests.codes.partial_content:
+            raise TIFFError(f'HTTP byte range {offset}-{length} '
+                            'not available. HTTP code {r.status_code}')
+        else:
+            return r.content
 
 @click.command()
 @click.option('--version', is_flag=True, callback=print_version,
               expose_value=False, is_eager=True)
 @click.option('--server', help='server e.g. http://localhost:8080')
-@click.option('--path', help='server path')
+@click.option('--path', default=None, help='server path')
 @click.option('--resource', help='server resource')
-@click.option('--output', type=click.Path(exists=False, file_okay=False, writable=True), help='local output directory')
+@click.option('--output', default=None, type=click.Path(exists=False, file_okay=False, writable=True), help='local output directory')
 @click.option('--xyz', type=click.INT, default=[0, 0, 0], help='xyz tile coordinates where z is the overview level', nargs=3)
 def dump(server, path, resource, output, xyz=None):
     """Command line entry for COG tile dumping."""
