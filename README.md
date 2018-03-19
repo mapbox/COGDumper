@@ -6,6 +6,9 @@ This can be useful for serving compressed tiles from a TIFF without invoking Ras
 
 Tiled Tiff is an extension to TIFF 6.0 and more detail can be found [here](http://www.alternatiff.com/resources/TIFFphotoshop.pdf)
 
+Note that tiles are padded at the edge of an image. This requires an image mask to be defined if tile sizes do not align with the image width / height (as in the test data which demonstrates this effect).
+
+
 ## Data Preparation
 
 Read the document on [COG](https://trac.osgeo.org/gdal/wiki/CloudOptimizedGeoTIFF) and create a tiled pyramid GeoTIFF.
