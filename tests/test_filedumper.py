@@ -56,9 +56,9 @@ def test_tiff_ifds(tiff):
     cog.read_ifd(1)
     assert [0, 1] == sorted(cog._ifds.keys())
     # skip to test range parsing
-    cog.read_ifd(5)
-    assert [0, 1, 2, 3, 4, 5] == sorted(cog._ifds.keys())
-    assert 0 == cog._ifds[5]['next_offset']
+    cog.read_ifd(4)
+    assert [0, 1, 2, 3, 4] == sorted(cog._ifds.keys())
+    assert 0 == cog._ifds[4]['next_offset']
     # check out of range
     with pytest.raises(TIFFError) as tiff_error:
         cog.read_ifd(10)
@@ -81,10 +81,10 @@ def test_tiff_tile(tiff):
     reader = FileReader(tiff)
     cog = COGTiff(reader.read)
     mime_type, tile = cog.get_tile(0, 0, 0)
-    assert 1849 == len(cog._ifds[0]['offsets'])
-    assert 1849 == len(cog._ifds[0]['byte_counts'])
+    assert 1 == len(cog._ifds[0]['offsets'])
+    assert 1 == len(cog._ifds[0]['byte_counts'])
     assert 'jpeg_tables' in cog._ifds[0]
-    assert 142 == len(cog._ifds[0]['jpeg_tables'])
+    assert 73 == len(cog._ifds[0]['jpeg_tables'])
     assert mime_type == 'image/jpeg'
 
 def test_bigtiff_tile(bigtiff):
@@ -95,4 +95,4 @@ def test_bigtiff_tile(bigtiff):
     assert 1 == len(cog._ifds[0]['byte_counts'])
     assert 'jpeg_tables' in cog._ifds[0]
     assert cog._ifds[0]['jpeg_tables'] is None
-    assert mime_type == 'image/tiff'
+    assert mime_type == 'application/octet-stream'

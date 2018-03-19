@@ -272,7 +272,7 @@ class COGTiff:
                     if val in CompressionType:
                         mime_type = CompressionType[val]
                     else:
-                        mime_type = 'image/tiff'
+                        mime_type = 'application/octet-stream'
                 elif code == 322:
                     # tile width
                     tile_width = struct.unpack(
