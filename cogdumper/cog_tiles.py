@@ -317,7 +317,7 @@ class COGTiff:
             ifd['ny_tiles'] = ceil(image_height / float(tile_height))
 
         # retrieve tile
-        idx = (y * ifd['ny_tiles']) + (x * ifd['nx_tiles'])
+        idx = (y * ifd['ny_tiles']) + x
         if idx > len(ifd['offsets']):
             raise TIFFError(f'Tile {x} {y} {z} does not exist')
         else:
