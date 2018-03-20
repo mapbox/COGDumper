@@ -48,51 +48,36 @@ def test_tiff_ifds(tiff):
     reader = FileReader(tiff)
     cog = COGTiff(reader.read)
     # read private variable directly for testing
-    assert cog._ifds == {}
     cog.read_header()
-    assert 0 in cog._ifds
-    assert 8 == len(cog._ifds[0]['tags'])
-    # read a next overview IFD to test reading is incremental
-    cog.read_ifd(1)
-    assert [0, 1] == sorted(cog._ifds.keys())
-    # skip to test range parsing
-    cog.read_ifd(4)
-    assert [0, 1, 2, 3, 4] == sorted(cog._ifds.keys())
-    assert 0 == cog._ifds[4]['next_offset']
-    # check out of range
-    with pytest.raises(TIFFError) as tiff_error:
-        cog.read_ifd(10)
+    assert len(cog._image_ifds) > 0
+    assert 8 == len(cog._image_ifds[0]['tags'])
+    assert 0 == cog._image_ifds[4]['next_offset']
 
 def test_bigtiff_ifds(bigtiff):
     reader = FileReader(bigtiff)
     cog = COGTiff(reader.read)
     # read private variable directly for testing
-    assert cog._ifds == {}
     cog.read_header()
-    assert 0 in cog._ifds
-    assert 7 == len(cog._ifds[0]['tags'])
-    cog.read_ifd(4)
-    assert 0 == cog._ifds[4]['next_offset']
-    # check out of range
-    with pytest.raises(TIFFError) as tiff_error:
-        cog.read_ifd(10)
+    assert len(cog._image_ifds) > 0
+    assert 7 == len(cog._image_ifds[0]['tags'])
+    assert 0 == cog._image_ifds[4]['next_offset']
 
 def test_tiff_tile(tiff):
     reader = FileReader(tiff)
     cog = COGTiff(reader.read)
     mime_type, tile = cog.get_tile(0, 0, 0)
-    assert 1 == len(cog._ifds[0]['offsets'])
-    assert 1 == len(cog._ifds[0]['byte_counts'])
-    assert 'jpeg_tables' in cog._ifds[0]
-    assert 73 == len(cog._ifds[0]['jpeg_tables'])
+    assert 1 == len(cog._image_ifds[0]['offsets'])
+    assert 1 == len(cog._image_ifds[0]['byte_counts'])
+    assert 'jpeg_tables' in cog._image_ifds[0]
+    assert 73 == len(cog._image_ifds[0]['jpeg_tables'])
     assert mime_type == 'image/jpeg'
 
 def test_bigtiff_tile(bigtiff):
     reader = FileReader(bigtiff)
     cog = COGTiff(reader.read)
     mime_type, tile = cog.get_tile(0, 0, 0)
-    assert 1 == len(cog._ifds[0]['offsets'])
-    assert 1 == len(cog._ifds[0]['byte_counts'])
-    assert 'jpeg_tables' in cog._ifds[0]
-    assert cog._ifds[0]['jpeg_tables'] is None
+    assert 1 == len(cog._image_ifds[0]['offsets'])
+    assert 1 == len(cog._image_ifds[0]['byte_counts'])
+    assert 'jpeg_tables' in cog._image_ifds[0]
+    assert cog._image_ifds[0]['jpeg_tables'] is None
     assert mime_type == 'application/octet-stream'

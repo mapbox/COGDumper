@@ -15,6 +15,7 @@ tags = {
 compression = {
     6: 'image/jpeg',
     7: 'image/jpeg',
+    8: 'deflate',
     34712: 'image/jp2'
 }
 
