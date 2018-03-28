@@ -10,16 +10,19 @@ from cogdumper.tifftags import compression as CompressionType
 from cogdumper.tifftags import sizes as TIFFSizes
 from cogdumper.tifftags import tags as TIFFTags
 
+
 def print_version(ctx, param, value):
     if not value or ctx.resilient_parsing:
         return
     click.echo('Version 1.0')
     ctx.exit()
 
+
 class AbstractReader:
     @abstractmethod
     def read(offset, len):
         pass
+
 
 class COGTiff:
     """
@@ -28,8 +31,8 @@ class COGTiff:
     Format
 
         TIFF / BigTIFF signature
-        IFD (​Image File Directory) of full resolution image
-        Values of TIFF tags that don't fit inline in the IFD directory, such as TileOffsets?, TileByteCounts? and GeoTIFF keys
+        IFD (Image File Directory) of full resolution image
+        Values of TIFF tags that don't fit inline in the IFD directory, such as TileOffsets, TileByteCounts and GeoTIFF keys
         Optional: IFD (Image File Directory) of first overview (typically subsampled by a factor of 2), followed by the values of its tags that don't fit inline
         Optional: IFD (Image File Directory) of second overview (typically subsampled by a factor of 4), followed by the values of its tags that don't fit inline
         ...
@@ -40,6 +43,13 @@ class COGTiff:
         Tile content of full resolution image.
     """
     def __init__(self, reader):
+        """Parses a (Big)TIFF for image tiles.
+
+        Parameters
+        ----------
+        reader:
+            A reader that implements the cogdumper.cog_tiles.AbstractReader methods
+        """
         self._init = False
         self._endian = '<'
         self._version = 42
@@ -299,7 +309,7 @@ class COGTiff:
             self._mask_ifds = []
 
     def get_tile(self, x, y, z):
-        if self._init == False:
+        if self._init is False:
             self.read_header()
 
         if z < len(self._image_ifds):
@@ -333,6 +343,6 @@ class COGTiff:
 
     @property
     def version(self):
-        if self._init == False:
+        if self._init is False:
             self.read_header()
         return self._version

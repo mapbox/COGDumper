@@ -9,8 +9,10 @@ import click
 
 from cogdumper.cog_tiles import (AbstractReader, COGTiff, print_version)
 
+
 region = os.environ.get('AWS_REGION', 'us-east-1')
 s3 = boto3.resource('s3', region_name=region)
+
 
 class Reader(AbstractReader):
     """Wraps the remote COG."""

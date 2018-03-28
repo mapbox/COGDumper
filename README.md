@@ -1,5 +1,7 @@
 # COG Dumper
 
+[![Build Status](https://travis-ci.org/mapbox/COGDumper.svg?branch=master)](https://travis-ci.org/mapbox/COGDumper) [![codecov.io](https://codecov.io/github/mapbox/COGDumper/coverage.svg?token=Yd3y5aTvGo&branch=master)](https://codecov.io/github/mapbox/COGDumper?branch=master)
+
 A python3 utility to extract a tile from a Cloud Optimized GeoTIFF (COG) without decompressing the contained data. Tiff data can be hosted locally, on a web server or S3.
 
 This can be useful for serving compressed tiles from a TIFF without invoking Rasterio and GDAL. This utility has been tested with Tiff that have JPEG compression.
@@ -25,7 +27,7 @@ gdal_translate S2A_MSIL1C_20170102T111442_N0204_R137_T30TXT_20170102T111441_TCI.
                -co TILED=YES -co COMPRESS=JPEG -co PHOTOMETRIC=YCBCR -co COPY_SRC_OVERVIEWS=YES
 ```
 
-This library works with a file hosted in an S3 bucket.
+This library also works with a file hosted in an S3 bucket.
 
 ## Installation
 
@@ -34,15 +36,15 @@ This library works with a file hosted in an S3 bucket.
 ## Command line interface
 
 ```
-python cogdumper/filedumper.py --help
-python cogdumper/httpdumper.py --help
-python cogdumper/s3dumper.py --help
+python -m cogdumper.filedumper --help
+python -m cogdumper.httpdumper --help
+python -m cogdumper.s3dumper --help
 ```
 
 e.g.
 
 ```
-python cogdumper/filedumper.py --file data/cog.tif --xyz 0 0 0
-python cogdumper/httpdumper.py --server http://localhost:8080 --path data --resource cog.tif
-python cogdumper/s3dumper.py --bucket bucket_name --key key_name/image.tif --xyz 0 0 0
+python -m cogdumper.filedumper --file data/cog.tif --xyz 0 0 0
+python -m cogdumper.httpdumper --server http://localhost:8080 --path data --resource cog.tif
+python -m cogdumper.s3dumper --bucket bucket_name --key key_name/image.tif --xyz 0 0 0
 ```

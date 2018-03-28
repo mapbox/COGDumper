@@ -4,7 +4,8 @@ import os
 
 import pytest
 
-from cogdumper import (FileReader, COGTiff, TIFFError)
+from cogdumper.filedumper import Reader as FileReader
+from cogdumper import (COGTiff)
 
 
 @pytest.fixture
@@ -34,15 +35,18 @@ def bigtiff(data_dir):
     with open(f, 'rb') as src:
         yield src
 
+
 def test_tiff_version(tiff):
     reader = FileReader(tiff)
     cog = COGTiff(reader.read)
     assert cog.version == 42
 
+
 def test_bigtiff_version(bigtiff):
     reader = FileReader(bigtiff)
     cog = COGTiff(reader.read)
     assert cog.version == 43
+
 
 def test_tiff_ifds(tiff):
     reader = FileReader(tiff)
@@ -53,6 +57,7 @@ def test_tiff_ifds(tiff):
     assert 8 == len(cog._image_ifds[0]['tags'])
     assert 0 == cog._image_ifds[4]['next_offset']
 
+
 def test_bigtiff_ifds(bigtiff):
     reader = FileReader(bigtiff)
     cog = COGTiff(reader.read)
@@ -61,6 +66,7 @@ def test_bigtiff_ifds(bigtiff):
     assert len(cog._image_ifds) > 0
     assert 7 == len(cog._image_ifds[0]['tags'])
     assert 0 == cog._image_ifds[4]['next_offset']
+
 
 def test_tiff_tile(tiff):
     reader = FileReader(tiff)
@@ -71,6 +77,7 @@ def test_tiff_tile(tiff):
     assert 'jpeg_tables' in cog._image_ifds[0]
     assert 73 == len(cog._image_ifds[0]['jpeg_tables'])
     assert mime_type == 'image/jpeg'
+
 
 def test_bigtiff_tile(bigtiff):
     reader = FileReader(bigtiff)

@@ -5,5 +5,5 @@ setup(
     version='0.1dev',
     packages=['cogdumper', ],
     long_description=open('README.md').read(),
-    install_requires=open('requirements.txt').read().splitlines()
+    install_requires=['boto3>=1.6.2', 'click>=6.7', 'requests>=2.18.4']
 )
