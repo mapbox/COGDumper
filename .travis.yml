@@ -1,0 +1,19 @@
+language: python
+sudo: false
+cache:
+  directories:
+    - ~/.cache/pip
+
+python:
+  - "3.6"
+before_install:
+  - pip install -U pip
+install:
+  - "pip install -r requirements.txt"
+  - "pip install codecov"
+  - "pip install -e .[test]"
+script:
+  - py.test --cov COGDumper --cov-report term-missing -vv
+after_success:
+  - codecov -t 9e7162ed-d3ec-402c-bd2a-0e6ad9bc280f
+  - codecov
