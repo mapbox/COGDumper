@@ -1,6 +1,6 @@
 # COG Dumper
 
-[![Build Status](https://travis-ci.org/mapbox/COGDumper.svg?branch=master)](https://travis-ci.org/mapbox/COGDumper) [![codecov.io](https://codecov.io/github/mapbox/COGDumper/coverage.svg?token=Yd3y5aTvGo&branch=master)](https://codecov.io/github/mapbox/COGDumper?branch=master)
+[![Build Status](https://travis-ci.org/mapbox/COGDumper.svg?branch=master)](https://travis-ci.org/mapbox/COGDumper) [![codecov](https://codecov.io/gh/mapbox/COGDumper/branch/master/graph/badge.svg?token=Yd3y5aTvGo)](https://codecov.io/gh/mapbox/COGDumper)
 
 A python3 utility to extract a tile from a Cloud Optimized GeoTIFF (COG) without decompressing the contained data. Tiff data can be hosted locally, on a web server or S3.
 
