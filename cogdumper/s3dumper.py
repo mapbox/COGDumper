@@ -20,24 +20,12 @@ class Reader(AbstractReader):
         self.filename = key
         self.bucket = bucket_name
         self.key = key
-        self._resource_exists = True
-        try:
-            print(bucket_name)
-            s3.meta.client.head_bucket(Bucket=bucket_name,)
-        except ClientError as e:
-            # If a client error is thrown, then check that it was a 404 error.
-            # If it was a 404 error, then the bucket does not exist.
-            error_code = int(e.response['Error']['Code'])
-            if error_code == 404:
-                self._resource_exists = False
-
-    @property
-    def resource_exists(self):
-        return self._resource_exists
 
     def read(self, offset, length):
+        start = offset
+        stop = offset + length - 1
         r = s3.meta.client.get_object(Bucket=self.bucket, Key=self.key,
-                                Range=f'bytes={offset}-{offset + length - 1}')
+                                Range=f'bytes={start}-{stop}')
         return r['Body'].read()
 
 
@@ -48,7 +36,7 @@ class Reader(AbstractReader):
 @click.option('--key', help='bucket key')
 @click.option('--output', default=None, type=click.Path(exists=False, file_okay=False, writable=True), help='local output directory')
 @click.option('--xyz', type=click.INT, default=[0, 0, 0], help='xyz tile coordinates where z is the overview level', nargs=3)
-def dump(bucket, key, output, xyz=None):
+def dump(bucket, key, output, xyz):
     """Command line entry for COG tile dumping."""
     reader = Reader(bucket, key)
     cog = COGTiff(reader.read)

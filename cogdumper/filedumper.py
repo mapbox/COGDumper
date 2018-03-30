@@ -1,5 +1,6 @@
 """A utility to dump tiles directly from a local tiff file."""
 
+
 import mimetypes
 
 import click
@@ -25,7 +26,7 @@ class Reader(AbstractReader):
 @click.option('--xyz', type=click.INT, default=[0, 0, 0], help='xyz tile coordinate where z is the overview level', nargs=3)
 def dump(file, output, xyz=None):
     """Command line entry for COG tile dumping."""
-    with open(file, 'rb') as src:
+    with open(file, 'rb') as src: 
         reader = Reader(src)
         cog = COGTiff(reader.read)
         mime_type, tile = cog.get_tile(*xyz)

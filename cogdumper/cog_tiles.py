@@ -11,14 +11,14 @@ from cogdumper.tifftags import sizes as TIFFSizes
 from cogdumper.tifftags import tags as TIFFTags
 
 
-def print_version(ctx, param, value):
+def print_version(ctx, param, value):  # pragma: no cover
     if not value or ctx.resilient_parsing:
         return
     click.echo('Version 1.0')
     ctx.exit()
 
 
-class AbstractReader:
+class AbstractReader:  # pragma: no cover
     @abstractmethod
     def read(offset, len):
         pass
@@ -97,7 +97,7 @@ class COGTiff:
                             bytes[pos + 2: pos + 4]
                         )[0]
 
-                        if dtype not in TIFFSizes:
+                        if dtype not in TIFFSizes:  # pragma: no cover
                             raise TIFFError(
                                 f'Unrecognised data type {dtype}'
                             )
@@ -109,7 +109,7 @@ class COGTiff:
                         tag_len = num_values * TIFFSizes[dtype]['size']
                         if tag_len <= 8:
                             data = bytes[pos + 12: pos + 12 + tag_len]
-                        else:
+                        else:  # pragma: no cover
                             data_offset = struct.unpack(
                                 f'{self._endian}Q',
                                 bytes[pos + 12: pos + 20]
@@ -148,7 +148,7 @@ class COGTiff:
                             bytes[pos + 2: pos + 4]
                         )[0]
 
-                        if dtype not in TIFFSizes:
+                        if dtype not in TIFFSizes:  # pragma: no cover
                             raise TIFFError(
                                 f'Unrecognised data type {dtype}'
                             )
@@ -211,9 +211,9 @@ class COGTiff:
             bytesize = struct.unpack(f'{self._endian}H', bytes[0:2])[0]
             w = struct.unpack(f'{self._endian}H', bytes[2:4])[0]
             self._offset = struct.unpack(f'{self._endian}Q', bytes[4:])[0]
-            if bytesize != 8 or w != 0:
+            if bytesize != 8 or w != 0:  # pragma: no cover
                 raise TIFFError(f"Invalid BigTIFF with bytesize {bytesize} and word {w}")
-        else:
+        else:  # pragma: no cover
             raise TIFFError(f"Invalid version {self._version} for TIFF file")
 
         self._init = True
@@ -304,7 +304,7 @@ class COGTiff:
             else:
                 self._image_ifds.append(ifd)
 
-        if len(self._image_ifds) == 0 and len(self._mask_ifds) > 0:
+        if len(self._image_ifds) == 0 and len(self._mask_ifds) > 0:  # pragma: no cover
             self._image_ifds = self._mask_ifds
             self._mask_ifds = []
 
@@ -325,7 +325,6 @@ class COGTiff:
                     # fix up jpeg tile with missing quantization tables
                     tile = insert_tables(tile, image_ifd['jpeg_tables'])
                     # look for a bit mask file
-                    # NOTE: this will change with the bitmasks being in the tiles
                     if z < len(self._mask_ifds):
                         mask_ifd = self._mask_ifds[z]
                         mask_offset = mask_ifd['offsets'][idx]

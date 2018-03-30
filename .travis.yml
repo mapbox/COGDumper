@@ -10,8 +10,6 @@ before_install:
   - pip install -U pip
 install:
   - "pip install -r requirements.txt"
-  - "pip install codecov"
-  - "pip install pytest-cov"
   - "pip install -e .[test]"
 script:
   - python -m pytest --cov=cogdumper --cov-report term-missing -vv
