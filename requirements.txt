@@ -1,0 +1,4 @@
+boto3==1.6.2
+click==6.7
+pytest==3.4.2
+requests==2.18.4

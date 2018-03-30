@@ -1,0 +1,6 @@
+[run]
+omit =
+  cogdumper/filedumper.py
+  cogdumper/httpdumper.py
+  cogdumper/s3dumper.py
+  cogdumper/jpegreader.py
