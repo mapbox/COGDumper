@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/mapbox/COGDumper.svg?branch=master)](https://travis-ci.org/mapbox/COGDumper) [![codecov](https://codecov.io/gh/mapbox/COGDumper/branch/master/graph/badge.svg?token=Yd3y5aTvGo)](https://codecov.io/gh/mapbox/COGDumper)
 
-A python3 utility to extract a tile from a Cloud Optimized GeoTIFF (COG) without decompressing the contained data. Tiff data can be hosted locally, on a web server or S3.
+A python (3.6) utility to extract a tile from a Cloud Optimized GeoTIFF (COG) without decompressing the contained data. Tiff data can be hosted locally, on a web server or S3.
 
 This can be useful for serving compressed tiles from a TIFF without invoking Rasterio and GDAL. This utility has been tested with Tiff that have JPEG compression.
 
@@ -30,6 +30,8 @@ gdal_translate S2A_MSIL1C_20170102T111442_N0204_R137_T30TXT_20170102T111441_TCI.
 This library also works with a file hosted in an S3 bucket.
 
 ## Installation
+
+Python 3.6 is required.
 
 `pip install -r requirements.txt`
 
