@@ -10,7 +10,7 @@ with open('cogdumper/__init__.py') as f:
             continue
 
 setup(
-    name='COGDumper',
+    name='cogdumper',
     version=version,
     packages=['cogdumper', ],
     long_description=open('README.md').read(),
