@@ -11,13 +11,6 @@ from cogdumper.tifftags import sizes as TIFFSizes
 from cogdumper.tifftags import tags as TIFFTags
 
 
-def print_version(ctx, param, value):  # pragma: no cover
-    if not value or ctx.resilient_parsing:
-        return
-    click.echo('Version 1.0')
-    ctx.exit()
-
-
 class AbstractReader:  # pragma: no cover
     @abstractmethod
     def read(offset, len):
@@ -29,7 +22,6 @@ class COGTiff:
     Cloud Optimised GeoTIFF
     -----
     Format
-
         TIFF / BigTIFF signature
         IFD (Image File Directory) of full resolution image
         Values of TIFF tags that don't fit inline in the IFD directory, such as TileOffsets, TileByteCounts and GeoTIFF keys
@@ -44,7 +36,6 @@ class COGTiff:
     """
     def __init__(self, reader):
         """Parses a (Big)TIFF for image tiles.
-
         Parameters
         ----------
         reader:
@@ -61,17 +52,14 @@ class COGTiff:
 
     def ifds(self):
         """Reads TIFF image file directories from a COG recursively.
-
         Parameters
         -----------
-
         offset:
             number, offset into the tiff stream to read from, this is only
             required for the first image file directory
         overview:
             number, an identifier that is the overview level in the COG
             image pyramid
-
         Yield
         --------
         dict: Image File Directory for the next IFD
@@ -98,9 +86,7 @@ class COGTiff:
                         )[0]
 
                         if dtype not in TIFFSizes:  # pragma: no cover
-                            raise TIFFError(
-                                f'Unrecognised data type {dtype}'
-                            )
+                            raise TIFFError(f'Unrecognised data type {dtype}')
 
                         num_values = struct.unpack(
                             f'{self._endian}Q',
@@ -149,9 +135,7 @@ class COGTiff:
                         )[0]
 
                         if dtype not in TIFFSizes:  # pragma: no cover
-                            raise TIFFError(
-                                f'Unrecognised data type {dtype}'
-                            )
+                            raise TIFFError(f'Unrecognised data type {dtype}')
 
                         num_values = struct.unpack(
                             f'{self._endian}L',
