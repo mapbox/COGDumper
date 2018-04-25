@@ -4,3 +4,4 @@ omit =
   cogdumper/httpdumper.py
   cogdumper/s3dumper.py
   cogdumper/jpegreader.py
+  cogdumper/scripts/cli.py

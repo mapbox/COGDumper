@@ -33,20 +33,85 @@ This library also works with a file hosted in an S3 bucket.
 
 Python 3.6 is required.
 
-`pip install -r requirements.txt`
+```
+pip install cogdumper
+```
+
+or from source
+
+```
+git clone https://github.com/mapbox/COGDumper
+cd COGDumper
+pip install .
+```
 
 ## Command line interface
 
 ```
-python -m cogdumper.filedumper --help
-python -m cogdumper.httpdumper --help
-python -m cogdumper.s3dumper --help
+$ cogdumper --help
+Usage: cogdumper [OPTIONS] COMMAND [ARGS]...
+
+  Command line interface for COGDumper.
+
+Options:
+  --version  Show the version and exit.
+  --help     Show this message and exit.
+
+Commands:
+  file  COGDumper cli for local dataset.
+  http  COGDumper cli for web hosted dataset.
+  s3    COGDumper cli for AWS S3 hosted dataset
 ```
 
-e.g.
+##### local files
+```
+cogdumper file --help
+Usage: cogdumper file [OPTIONS]
+
+  COGDumper cli for local dataset.
+
+Options:
+  --file PATH       input file  [required]
+  --output PATH     local output directory
+  --xyz INTEGER...  xyz tile coordinate where z is the overview level
+  --version         Show the version and exit.
+  --help            Show this message and exit.
+```
+e.g. `cogdumper file --file data/cog.tif --xyz 0 0 0`
+
+##### web files
 
 ```
-python -m cogdumper.filedumper --file data/cog.tif --xyz 0 0 0
-python -m cogdumper.httpdumper --server http://localhost:8080 --path data --resource cog.tif
-python -m cogdumper.s3dumper --bucket bucket_name --key key_name/image.tif --xyz 0 0 0
+cogdumper http --help
+Usage: cogdumper http [OPTIONS]
+
+  COGDumper cli for web hosted dataset.
+
+Options:
+  --server TEXT       server e.g. http://localhost:8080  [required]
+  --path TEXT         server path
+  --resource TEXT     server resource
+  --output DIRECTORY  local output directory
+  --xyz INTEGER...    xyz tile coordinates where z is the overview level
+  --version           Show the version and exit.
+  --help              Show this message and exit.
 ```
+
+e.g. `cogdumper http --server http://localhost:8080 --path data --resource cog.tif`
+
+##### S3 files
+```
+cogdumper s3 --help
+Usage: cogdumper s3 [OPTIONS]
+
+  COGDumper cli for AWS S3 hosted dataset
+
+Options:
+  --bucket TEXT       AWS S3 bucket  [required]
+  --key TEXT          AWS S3 key  [required]
+  --output DIRECTORY  local output directory
+  --xyz INTEGER...    xyz tile coordinates where z is the overview level
+  --help              Show this message and exit.
+```
+
+e.g. `cogdumper s3 --bucket bucket_name --key key_name/image.tif --xyz 0 0 0`
