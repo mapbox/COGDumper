@@ -23,12 +23,11 @@ setup(
     classifiers=[
       'Intended Audience :: Information Technology',
       'Intended Audience :: Science/Research',
-      'License :: OSI Approved :: BSD License',
       'Programming Language :: Python :: 3.6',
       'Topic :: Scientific/Engineering :: GIS'],
     author=u"Norman Barker",
     author_email='norman.barker@mapbox.com',
-    license='BSD',
+    license='MIT',
     long_description=open('README.md').read(),
     install_requires=inst_reqs,
     extras_require=extra_reqs,
