@@ -1,4 +1,5 @@
-from distutils.core import setup
+"""Setup."""
+from setuptools import setup, find_packages
 
 # Parse the version from the pxmcli module.
 with open('cogdumper/__init__.py') as f:
@@ -9,13 +10,28 @@ with open('cogdumper/__init__.py') as f:
             version = version.strip("'")
             continue
 
+inst_reqs = ['boto3>=1.6.2', 'click>=6.7', 'requests>=2.18.4']
+extra_reqs = {'test': ['pytest', 'pytest-cov', 'codecov']}
+
 setup(
     name='cogdumper',
     version=version,
-    packages=['cogdumper', ],
+    packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
+    python_requires='>=3',
+    keywords='CloudOptimized Geotiff',
+    url='https://github.com/mapbox/COGDumper',
+    classifiers=[
+      'Intended Audience :: Information Technology',
+      'Intended Audience :: Science/Research',
+      'License :: OSI Approved :: BSD License',
+      'Programming Language :: Python :: 3.6',
+      'Topic :: Scientific/Engineering :: GIS'],
+    author=u"Norman Barker",
+    author_email='norman.barker@mapbox.com',
+    license='BSD',
     long_description=open('README.md').read(),
-    install_requires=['boto3>=1.6.2', 'click>=6.7', 'requests>=2.18.4'],
-    extras_require={'test': ['pytest', 'pytest-cov', 'codecov']},
+    install_requires=inst_reqs,
+    extras_require=extra_reqs,
     entry_points={
       'console_scripts': [
         'cogdumper = cogdumper.scripts.cli:cogdumper'
