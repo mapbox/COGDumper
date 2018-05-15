@@ -66,7 +66,6 @@ def test_tiff_ifds(tiff):
     reader = FileReader(tiff)
     cog = COGTiff(reader.read)
     # read private variable directly for testing
-    cog.read_header()
     assert len(cog._image_ifds) > 0
     assert 8 == len(cog._image_ifds[0]['tags'])
     assert 0 == cog._image_ifds[4]['next_offset']
@@ -76,7 +75,6 @@ def test_be_tiff_ifds(be_tiff):
     reader = FileReader(be_tiff)
     cog = COGTiff(reader.read)
     # read private variable directly for testing
-    cog.read_header()
     assert len(cog._image_ifds) > 0
     assert 8 == len(cog._image_ifds[0]['tags'])
     assert 0 == cog._image_ifds[4]['next_offset']
@@ -86,7 +84,6 @@ def test_bigtiff_ifds(bigtiff):
     reader = FileReader(bigtiff)
     cog = COGTiff(reader.read)
     # read private variable directly for testing
-    cog.read_header()
     assert len(cog._image_ifds) > 0
     assert 7 == len(cog._image_ifds[0]['tags'])
     assert 0 == cog._image_ifds[4]['next_offset']
