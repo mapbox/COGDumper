@@ -71,23 +71,23 @@ class COGTiff:
             pos = 0
             tags = []
 
-            fallbackSize = 4048 if self._big_tiff else 1024
+            fallback_size = 4096 if self._big_tiff else 1024
             if self._offset > len(self.header):
-                bstarts = len(self.header)
-                bends = bstarts + self._offset + fallbackSize
-                self.header += self.read(bstarts, bends)
+                byte_starts = len(self.header)
+                byte_ends = byte_starts + self._offset + fallback_size
+                self.header += self.read(byte_starts, byte_ends)
 
             if self._big_tiff:
                 bytes = self.header[self._offset: self._offset + 8]
                 num_tags = struct.unpack(f'{self._endian}Q', bytes)[0]
 
-                bstarts = self._offset + 8
-                bends = (num_tags * 20) + 8 + bstarts
-                if bends > len(self.header):
+                byte_starts = self._offset + 8
+                byte_ends = (num_tags * 20) + 8 + byte_starts
+                if byte_ends > len(self.header):
                     s = len(self.header)
-                    self.header += self.read(s, bends)
+                    self.header += self.read(s, byte_ends)
 
-                bytes = self.header[bstarts: bends]
+                bytes = self.header[byte_starts: byte_ends]
 
                 for t in range(0, num_tags):
                     code = struct.unpack(
@@ -117,12 +117,13 @@ class COGTiff:
                                 bytes[pos + 12: pos + 20]
                             )[0]
 
-                            bstarts = data_offset
-                            bends = data_offset + tag_len
-                            if bends > len(self.header):
+                            byte_starts = data_offset
+                            byte_ends = byte_starts + tag_len
+                            if byte_ends > len(self.header):
                                 s = len(self.header)
-                                self.header += self.read(s, bends)
-                            data = self.header[bstarts: bends]
+                                self.header += self.read(s, byte_ends)
+
+                            data = self.header[byte_starts: byte_ends]
 
                         tags.append(
                             {
@@ -144,12 +145,13 @@ class COGTiff:
                 bytes = self.header[self._offset: self._offset + 2]
                 num_tags = struct.unpack(f'{self._endian}H', bytes)[0]
 
-                bstarts = self._offset + 2
-                bends = (num_tags * 12) + 2 + bstarts
-                if bends > len(self.header):
+                byte_starts = self._offset + 2
+                byte_ends = (num_tags * 12) + 2 + byte_starts
+                if byte_ends > len(self.header):
                     s = len(self.header)
-                    self.header += self.read(s, bends)
-                bytes = self.header[bstarts: bends]
+                    self.header += self.read(s, byte_ends)
+
+                bytes = self.header[byte_starts: byte_ends]
 
                 for t in range(0, num_tags):
                     code = struct.unpack(
@@ -179,12 +181,12 @@ class COGTiff:
                                 bytes[pos + 8: pos + 12]
                             )[0]
 
-                            bstarts = data_offset
-                            bends = data_offset + tag_len
-                            if bends > len(self.header):
+                            byte_starts = data_offset
+                            byte_ends = byte_starts + tag_len
+                            if byte_ends > len(self.header):
                                 s = len(self.header)
-                                self.header += self.read(s, bends)
-                            data = self.header[bstarts: bends]
+                                self.header += self.read(s, byte_ends)
+                            data = self.header[byte_starts: byte_ends]
 
                         tags.append(
                             {
