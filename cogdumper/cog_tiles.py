@@ -179,7 +179,6 @@ class COGTiff:
                                 bytes[pos + 8: pos + 12]
                             )[0]
 
-                            # TODO Check if we need to expend the buffer
                             bstarts = data_offset
                             bends = data_offset + tag_len
                             if bends > len(self.header):
