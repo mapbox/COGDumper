@@ -14,12 +14,14 @@ class Reader(AbstractReader):
     """Wraps the remote COG."""
 
     def __init__(self, bucket_name, key):
+        """Init reader object."""
         self.bucket = bucket_name
         self.key = key
+        self.source = s3.Object(self.bucket, self.key)
 
     def read(self, offset, length):
+        """Read method."""
         start = offset
         stop = offset + length - 1
-        r = s3.meta.client.get_object(Bucket=self.bucket, Key=self.key,
-                                      Range=f'bytes={start}-{stop}')
+        r = self.source.get(Range=f'bytes={start}-{stop}')
         return r['Body'].read()
