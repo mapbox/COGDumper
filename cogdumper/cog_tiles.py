@@ -1,5 +1,7 @@
 """Function for extracting tiff tiles."""
 
+import os
+
 from abc import abstractmethod
 from math import ceil
 import struct
@@ -214,7 +216,8 @@ class COGTiff:
 
     def read_header(self):
         """Read and parse COG header."""
-        self.header = self.read(0, 1024)
+        buff_size = int(os.environ.get('COG_INGESTED_BYTES_AT_OPEN', '16384'))
+        self.header = self.read(0, buff_size)
 
         # read first 4 bytes to determine tiff or bigtiff and byte order
         if self.header[:2] == b'MM':

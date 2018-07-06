@@ -1,10 +1,14 @@
 """A utility to dump tiles directly from a tiff file on a http server."""
 
+import logging
+
 import requests
 from requests.auth import HTTPBasicAuth
 
 from cogdumper.errors import TIFFError
 from cogdumper.cog_tiles import AbstractReader
+
+logger = logging.getLogger(__name__)
 
 
 class Reader(AbstractReader):
@@ -37,6 +41,7 @@ class Reader(AbstractReader):
     def read(self, offset, length):
         start = offset
         stop = offset + length - 1
+        logger.info(f'Reading bytes: {start} to {stop}')
         headers = {'Range': f'bytes={start}-{stop}'}
         r = self.session.get(self.url, auth=self.auth, headers=headers)
         if r.status_code != requests.codes.partial_content:

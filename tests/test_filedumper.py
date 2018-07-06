@@ -99,6 +99,19 @@ def test_tiff_tile(tiff):
     assert 73 == len(cog._image_ifds[0]['jpeg_tables'])
     assert mime_type == 'image/jpeg'
 
+
+def test_tiff_tile_env(tiff, monkeypatch):
+    monkeypatch.setenv("COG_INGESTED_BYTES_AT_OPEN", "1024")
+    reader = FileReader(tiff)
+    cog = COGTiff(reader.read)
+    mime_type, tile = cog.get_tile(0, 0, 0)
+    assert 1 == len(cog._image_ifds[0]['offsets'])
+    assert 1 == len(cog._image_ifds[0]['byte_counts'])
+    assert 'jpeg_tables' in cog._image_ifds[0]
+    assert 73 == len(cog._image_ifds[0]['jpeg_tables'])
+    assert mime_type == 'image/jpeg'
+
+
 def test_bad_tiff_tile(tiff):
     reader = FileReader(tiff)
     cog = COGTiff(reader.read)

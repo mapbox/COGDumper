@@ -1,5 +1,5 @@
 """cli."""
-
+import logging
 import mimetypes
 
 import click
@@ -25,8 +25,13 @@ def cogdumper():
               help='local output directory')
 @click.option('--xyz', type=click.INT, default=[0, 0, 0], nargs=3,
               help='xyz tile coordinates where z is the overview level')
-def s3(bucket, key, output, xyz):
+@click.option('--verbose', '-v', is_flag=True, help='Show logs')
+@click.version_option(version=cogdumper_version, message='%(version)s')
+def s3(bucket, key, output, xyz, verbose):
     """Read AWS S3 hosted dataset."""
+    if verbose:
+        logging.basicConfig(level=logging.INFO)
+
     reader = S3Reader(bucket, key)
     cog = COGTiff(reader.read)
     mime_type, tile = cog.get_tile(*xyz)
@@ -50,9 +55,13 @@ def s3(bucket, key, output, xyz):
               help='local output directory')
 @click.option('--xyz', type=click.INT, default=[0, 0, 0], nargs=3,
               help='xyz tile coordinates where z is the overview level')
+@click.option('--verbose', '-v', is_flag=True, help='Show logs')
 @click.version_option(version=cogdumper_version, message='%(version)s')
-def http(server, path, resource, output, xyz=None):
+def http(server, path, resource, output, xyz, verbose):
     """Read web hosted dataset."""
+    if verbose:
+        logging.basicConfig(level=logging.INFO)
+
     reader = HTTPReader(server, path, resource)
     cog = COGTiff(reader.read)
     mime_type, tile = cog.get_tile(*xyz)
@@ -74,9 +83,13 @@ def http(server, path, resource, output, xyz=None):
               help='local output directory')
 @click.option('--xyz', type=click.INT, default=[0, 0, 0], nargs=3,
               help='xyz tile coordinate where z is the overview level')
+@click.option('--verbose', '-v', is_flag=True, help='Show logs')
 @click.version_option(version=cogdumper_version, message='%(version)s')
-def file(file, output, xyz=None):
+def file(file, output, xyz, verbose):
     """Read local dataset."""
+    if verbose:
+        logging.basicConfig(level=logging.INFO)
+
     with open(file, 'rb') as src:
         reader = FileReader(src)
         cog = COGTiff(reader.read)
