@@ -1,5 +1,7 @@
 """Function for extracting tiff tiles."""
 
+import os
+
 from abc import abstractmethod
 from math import ceil
 import struct
@@ -41,16 +43,18 @@ class COGTiff:
         reader:
             A reader that implements the cogdumper.cog_tiles.AbstractReader methods
         """
-        self._init = False
         self._endian = '<'
         self._version = 42
         self.read = reader
         self._big_tiff = False
+        self.header = ''
         self._offset = 0
         self._image_ifds = []
         self._mask_ifds = []
 
-    def ifds(self):
+        self.read_header()
+
+    def _ifds(self):
         """Reads TIFF image file directories from a COG recursively.
         Parameters
         -----------
@@ -68,10 +72,24 @@ class COGTiff:
             next_offset = 0
             pos = 0
             tags = []
+
+            fallback_size = 4096 if self._big_tiff else 1024
+            if self._offset > len(self.header):
+                byte_starts = len(self.header)
+                byte_ends = byte_starts + self._offset + fallback_size
+                self.header += self.read(byte_starts, byte_ends)
+
             if self._big_tiff:
-                bytes = self.read(self._offset, 8)
+                bytes = self.header[self._offset: self._offset + 8]
                 num_tags = struct.unpack(f'{self._endian}Q', bytes)[0]
-                bytes = self.read(self._offset + 8, (num_tags * 20) + 8)
+
+                byte_starts = self._offset + 8
+                byte_ends = (num_tags * 20) + 8 + byte_starts
+                if byte_ends > len(self.header):
+                    s = len(self.header)
+                    self.header += self.read(s, byte_ends)
+
+                bytes = self.header[byte_starts: byte_ends]
 
                 for t in range(0, num_tags):
                     code = struct.unpack(
@@ -100,7 +118,14 @@ class COGTiff:
                                 f'{self._endian}Q',
                                 bytes[pos + 12: pos + 20]
                             )[0]
-                            data = self.read(data_offset, tag_len)
+
+                            byte_starts = data_offset
+                            byte_ends = byte_starts + tag_len
+                            if byte_ends > len(self.header):
+                                s = len(self.header)
+                                self.header += self.read(s, byte_ends)
+
+                            data = self.header[byte_starts: byte_ends]
 
                         tags.append(
                             {
@@ -116,12 +141,20 @@ class COGTiff:
                 self._offset = self._offset + 8 + pos
                 next_offset = struct.unpack(
                     f'{self._endian}Q',
-                    self.read(self._offset, 8)
+                    self.header[self._offset: self._offset + 8]
                 )[0]
             else:
-                bytes = self.read(self._offset, 2)
+                bytes = self.header[self._offset: self._offset + 2]
                 num_tags = struct.unpack(f'{self._endian}H', bytes)[0]
-                bytes = self.read(self._offset + 2, (num_tags * 12) + 2)
+
+                byte_starts = self._offset + 2
+                byte_ends = (num_tags * 12) + 2 + byte_starts
+                if byte_ends > len(self.header):
+                    s = len(self.header)
+                    self.header += self.read(s, byte_ends)
+
+                bytes = self.header[byte_starts: byte_ends]
+
                 for t in range(0, num_tags):
                     code = struct.unpack(
                         f'{self._endian}H',
@@ -149,7 +182,13 @@ class COGTiff:
                                 f'{self._endian}L',
                                 bytes[pos + 8: pos + 12]
                             )[0]
-                            data = self.read(data_offset, tag_len)
+
+                            byte_starts = data_offset
+                            byte_ends = byte_starts + tag_len
+                            if byte_ends > len(self.header):
+                                s = len(self.header)
+                                self.header += self.read(s, byte_ends)
+                            data = self.header[byte_starts: byte_ends]
 
                         tags.append(
                             {
@@ -165,7 +204,7 @@ class COGTiff:
                 self._offset = self._offset + 2 + pos
                 next_offset = struct.unpack(
                     f'{self._endian}L',
-                    self.read(self._offset, 4)
+                    self.header[self._offset: self._offset + 4]
                 )[0]
 
             self._offset = next_offset
@@ -176,22 +215,25 @@ class COGTiff:
             }
 
     def read_header(self):
+        """Read and parse COG header."""
+        buff_size = int(os.environ.get('COG_INGESTED_BYTES_AT_OPEN', '16384'))
+        self.header = self.read(0, buff_size)
+
         # read first 4 bytes to determine tiff or bigtiff and byte order
-        bytes = self.read(0, 4)
-        if bytes[:2] == b'MM':
+        if self.header[:2] == b'MM':
             self._endian = '>'
 
-        self._version = struct.unpack(f'{self._endian}H', bytes[2:4])[0]
+        self._version = struct.unpack(f'{self._endian}H', self.header[2:4])[0]
 
         if self._version == 42:
             # TIFF
             self._big_tiff = False
             # read offset to first IFD
-            self._offset = struct.unpack(f'{self._endian}L', self.read(4, 4))[0]
+            self._offset = struct.unpack(f'{self._endian}L', self.header[4:8])[0]
         elif self._version == 43:
             # BIGTIFF
             self._big_tiff = True
-            bytes = self.read(4, 12)
+            bytes = self.header[4:16]
             bytesize = struct.unpack(f'{self._endian}H', bytes[0:2])[0]
             w = struct.unpack(f'{self._endian}H', bytes[2:4])[0]
             self._offset = struct.unpack(f'{self._endian}Q', bytes[4:])[0]
@@ -203,7 +245,7 @@ class COGTiff:
         self._init = True
 
         # for JPEG we need to read all IFDs, they are at the front of the file
-        for ifd in self.ifds():
+        for ifd in self._ifds():
             mime_type = 'image/jpeg'
             # tile offsets are an extension but if they aren't in the file then
             # you can't get a tile back!
@@ -293,9 +335,7 @@ class COGTiff:
             self._mask_ifds = []
 
     def get_tile(self, x, y, z):
-        if self._init is False:
-            self.read_header()
-
+        """Read tile data."""
         if z < len(self._image_ifds):
             image_ifd = self._image_ifds[z]
             idx = (y * image_ifd['ny_tiles']) + x
@@ -326,6 +366,4 @@ class COGTiff:
 
     @property
     def version(self):
-        if self._init is False:
-            self.read_header()
         return self._version

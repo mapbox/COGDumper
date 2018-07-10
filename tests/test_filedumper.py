@@ -66,7 +66,6 @@ def test_tiff_ifds(tiff):
     reader = FileReader(tiff)
     cog = COGTiff(reader.read)
     # read private variable directly for testing
-    cog.read_header()
     assert len(cog._image_ifds) > 0
     assert 8 == len(cog._image_ifds[0]['tags'])
     assert 0 == cog._image_ifds[4]['next_offset']
@@ -76,7 +75,6 @@ def test_be_tiff_ifds(be_tiff):
     reader = FileReader(be_tiff)
     cog = COGTiff(reader.read)
     # read private variable directly for testing
-    cog.read_header()
     assert len(cog._image_ifds) > 0
     assert 8 == len(cog._image_ifds[0]['tags'])
     assert 0 == cog._image_ifds[4]['next_offset']
@@ -86,7 +84,6 @@ def test_bigtiff_ifds(bigtiff):
     reader = FileReader(bigtiff)
     cog = COGTiff(reader.read)
     # read private variable directly for testing
-    cog.read_header()
     assert len(cog._image_ifds) > 0
     assert 7 == len(cog._image_ifds[0]['tags'])
     assert 0 == cog._image_ifds[4]['next_offset']
@@ -101,6 +98,19 @@ def test_tiff_tile(tiff):
     assert 'jpeg_tables' in cog._image_ifds[0]
     assert 73 == len(cog._image_ifds[0]['jpeg_tables'])
     assert mime_type == 'image/jpeg'
+
+
+def test_tiff_tile_env(tiff, monkeypatch):
+    monkeypatch.setenv("COG_INGESTED_BYTES_AT_OPEN", "1024")
+    reader = FileReader(tiff)
+    cog = COGTiff(reader.read)
+    mime_type, tile = cog.get_tile(0, 0, 0)
+    assert 1 == len(cog._image_ifds[0]['offsets'])
+    assert 1 == len(cog._image_ifds[0]['byte_counts'])
+    assert 'jpeg_tables' in cog._image_ifds[0]
+    assert 73 == len(cog._image_ifds[0]['jpeg_tables'])
+    assert mime_type == 'image/jpeg'
+
 
 def test_bad_tiff_tile(tiff):
     reader = FileReader(tiff)
