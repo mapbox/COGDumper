@@ -14,4 +14,4 @@ install:
 script:
   - python -m pytest --cov=cogdumper --cov-report term-missing -vv
 after_success:
-  - codecov -t 9e7162ed-d3ec-402c-bd2a-0e6ad9bc280f
+  - codecov -t $CODECOV_TOKEN
