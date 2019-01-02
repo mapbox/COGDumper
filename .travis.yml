@@ -14,4 +14,4 @@ install:
 script:
   - python -m pytest --cov=cogdumper --cov-report term-missing -vv
 after_success:
-  - codecov -t $CODECOV_TOKEN
+  - bash <(curl -s https://codecov.io/bash)
