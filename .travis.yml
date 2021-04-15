@@ -13,5 +13,4 @@ install:
   - "pip install -e .[test]"
 script:
   - python -m pytest --cov=cogdumper --cov-report term-missing -vv
-after_success:
-  - bash <(curl -s https://codecov.io/bash)
+  - cd tests && python -m codecov
