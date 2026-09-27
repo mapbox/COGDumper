@@ -338,7 +338,8 @@ class COGTiff:
         """Read tile data."""
         if z < len(self._image_ifds):
             image_ifd = self._image_ifds[z]
-            idx = (y * image_ifd['ny_tiles']) + x
+            # A row is nx tiles wide. ny is the number of rows.
+            idx = (y * image_ifd['nx_tiles']) + x
             if idx > len(image_ifd['offsets']):
                 raise TIFFError(f'Tile {x} {y} {z} does not exist')
             else:
