@@ -1,6 +1,8 @@
 """Tests the filedumper."""
 
+import io
 import os
+import struct
 
 import pytest
 
@@ -110,6 +112,33 @@ def test_tiff_tile_env(tiff, monkeypatch):
     assert 'jpeg_tables' in cog._image_ifds[0]
     assert 73 == len(cog._image_ifds[0]['jpeg_tables'])
     assert mime_type == 'image/jpeg'
+
+
+def test_tile_index_uses_column_count():
+    # 768 x 512 image, 256 px tiles: 3 across and 2 down.
+    # Tile (0, 1) is index 3. Multiplying the row by ny returned index 2.
+    payload = b'012345'
+    offsets_at = 86
+    counts_at = 110
+    data_at = 134
+    tags = b''.join([
+        struct.pack('<HHII', 256, 4, 1, 768),
+        struct.pack('<HHII', 257, 4, 1, 512),
+        struct.pack('<HHII', 322, 4, 1, 256),
+        struct.pack('<HHII', 323, 4, 1, 256),
+        struct.pack('<HHII', 324, 4, 6, offsets_at),
+        struct.pack('<HHII', 325, 4, 6, counts_at),
+    ])
+    blob = struct.pack('<HHI', 0x4949, 42, 8)
+    blob += struct.pack('<H', 6) + tags + struct.pack('<I', 0)
+    blob += struct.pack('<6I', *[data_at + i for i in range(6)])
+    blob += struct.pack('<6I', *([1] * 6))
+    blob += payload
+
+    cog = COGTiff(FileReader(io.BytesIO(blob)).read)
+    assert cog.get_tile(2, 0, 0)[1] == b'2'
+    assert cog.get_tile(0, 1, 0)[1] == b'3'
+    assert cog.get_tile(2, 1, 0)[1] == b'5'
 
 
 def test_bad_tiff_tile(tiff):
